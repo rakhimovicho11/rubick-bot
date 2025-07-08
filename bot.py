@@ -356,8 +356,9 @@ WEBHOOK_PATH = f"/webhook/{BOT_TOKEN}"
 WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
 
 async def on_startup(bot: Bot) -> None:
+    await set_commands()
     await bot.set_webhook(WEBHOOK_URL)
-    print(f"Webhook set to {WEBHOOK_URL}")
+    print(f"✅ Webhook установлен: {WEBHOOK_URL}")
 
 async def on_shutdown(bot: Bot) -> None:
     await bot.delete_webhook()
@@ -372,6 +373,8 @@ async def main():
     return app
 
 if __name__ == "__main__":
-    import uvicorn  # Make sure uvicorn is in requirements.txt
-    web.run_app(main(), host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
+    import os
+    port = int(os.environ.get("PORT", 10000))  # Render передаёт PORT сюда
+    web.run_app(main(), host="0.0.0.0", port=port)
+
 
