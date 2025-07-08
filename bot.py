@@ -350,15 +350,11 @@ WEBHOOK_PATH = f"/webhook/{BOT_TOKEN}"
 WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
 
 async def on_startup(bot: Bot):
+    await set_commands()
     await bot.set_webhook(WEBHOOK_URL)
     print(f"✅ Webhook установлен: {WEBHOOK_URL}")
 
-async def on_shutdown(bot: Bot):
-    await bot.delete_webhook()
-    print("🛑 Webhook удалён")
-
 async def main():
-    await set_commands()
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
 
@@ -366,6 +362,7 @@ async def main():
     SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
     return app
+
 
 if __name__ == "__main__":
     web.run_app(main(), host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
