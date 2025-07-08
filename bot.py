@@ -347,3 +347,31 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+import asyncio
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiohttp import web
+
+WEBHOOK_PATH = f"/webhook/{BOT_TOKEN}"
+WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
+
+async def on_startup(bot: Bot) -> None:
+    await bot.set_webhook(WEBHOOK_URL)
+    print(f"Webhook set to {WEBHOOK_URL}")
+
+async def on_shutdown(bot: Bot) -> None:
+    await bot.delete_webhook()
+
+async def main():
+    dp.startup.register(on_startup)
+    dp.shutdown.register(on_shutdown)
+
+    app = web.Application()
+    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
+    setup_application(app, dp, bot=bot)
+    return app
+
+if __name__ == "__main__":
+    import uvicorn  # Make sure uvicorn is in requirements.txt
+    web.run_app(main(), host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
+
