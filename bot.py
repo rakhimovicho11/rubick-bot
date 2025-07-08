@@ -341,13 +341,7 @@ async def is_user_subscribed(user_id: int) -> bool:
         return False
 
 # Точка входа
-async def main():
-    await set_commands()
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    asyncio.run(main())
-
+# Webhook-версия
 import asyncio
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
@@ -355,15 +349,16 @@ from aiohttp import web
 WEBHOOK_PATH = f"/webhook/{BOT_TOKEN}"
 WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
 
-async def on_startup(bot: Bot) -> None:
-    await set_commands()
+async def on_startup(bot: Bot):
     await bot.set_webhook(WEBHOOK_URL)
     print(f"✅ Webhook установлен: {WEBHOOK_URL}")
 
-async def on_shutdown(bot: Bot) -> None:
+async def on_shutdown(bot: Bot):
     await bot.delete_webhook()
+    print("🛑 Webhook удалён")
 
 async def main():
+    await set_commands()
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
 
@@ -373,8 +368,6 @@ async def main():
     return app
 
 if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 10000))  # Render передаёт PORT сюда
-    web.run_app(main(), host="0.0.0.0", port=port)
+    web.run_app(main(), host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
 
 
